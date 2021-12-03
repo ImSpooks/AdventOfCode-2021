@@ -8,14 +8,19 @@
     <artifactId>Year-2021</artifactId>
     <packaging>pom</packaging>
     <version>1.0</version>
-    <modules>
-        <module>Day-1</module>
-        <module>Day-2</module>
-    </modules>
 
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
     </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.22</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
 
 </project>
