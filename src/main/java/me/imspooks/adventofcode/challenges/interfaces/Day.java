@@ -7,8 +7,4 @@ package me.imspooks.adventofcode.challenges.interfaces;
 public interface Day {
 
     void preRun();
-
-    void runPart1();
-
-    void runPart2();
 }

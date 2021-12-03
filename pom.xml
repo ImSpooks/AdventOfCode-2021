@@ -6,7 +6,6 @@
 
     <groupId>me.imspooks.aoc</groupId>
     <artifactId>Year-2021</artifactId>
-    <packaging>pom</packaging>
     <version>1.0</version>
 
     <properties>

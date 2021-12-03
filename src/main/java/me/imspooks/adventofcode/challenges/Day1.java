@@ -1,6 +1,7 @@
 package me.imspooks.adventofcode.challenges;
 
 import me.imspooks.adventofcode.challenges.interfaces.Day;
+import me.imspooks.adventofcode.challenges.interfaces.Part;
 import me.imspooks.adventofcode.util.InputReader;
 
 import java.nio.charset.StandardCharsets;
@@ -18,11 +19,11 @@ public class Day1 implements Day {
 
     @Override
     public void preRun() {
-        this.lines = InputReader.toReader("/day-1/input.txt").getTextLines(StandardCharsets.UTF_8);
+        this.lines = InputReader.toReader("/assets/day-1/input.txt").getTextLines(StandardCharsets.UTF_8);
     }
 
-    @Override
-    public void runPart1() {
+    @Part(part = 1)
+    public int firstPart() {
         final AtomicInteger increaseAmount = new AtomicInteger(-1);
         final AtomicInteger lastMeasurement = new AtomicInteger(-1);
 
@@ -39,11 +40,11 @@ public class Day1 implements Day {
             lastMeasurement.set(parsed);
         });
 
-        System.out.println("Total increments = " + increaseAmount);
+        return increaseAmount.get();
     }
 
-    @Override
-    public void runPart2() {
+    @Part(part = 2)
+    public int secondPart() {
         final AtomicInteger increaseAmount = new AtomicInteger(0);
 
         // Convert text file to integers
@@ -57,6 +58,6 @@ public class Day1 implements Day {
             }
         }
 
-        System.out.println("Total increments: " + increaseAmount);
+        return increaseAmount.get();
     }
 }

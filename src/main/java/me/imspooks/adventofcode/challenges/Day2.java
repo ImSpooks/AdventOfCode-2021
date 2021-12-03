@@ -1,6 +1,7 @@
 package me.imspooks.adventofcode.challenges;
 
 import me.imspooks.adventofcode.challenges.interfaces.Day;
+import me.imspooks.adventofcode.challenges.interfaces.Part;
 import me.imspooks.adventofcode.util.InputReader;
 
 import java.nio.charset.StandardCharsets;
@@ -18,11 +19,11 @@ public class Day2 implements Day {
 
     @Override
     public void preRun() {
-        this.lines = InputReader.toReader("/day-2/input.txt").getTextLines(StandardCharsets.UTF_8);
+        this.lines = InputReader.toReader("/assets/day-2/input.txt").getTextLines(StandardCharsets.UTF_8);
     }
 
-    @Override
-    public void runPart1() {
+    @Part(part = 1)
+    public int firstPart() {
         // Keep track of our position
         final AtomicInteger horizontal = new AtomicInteger(0);
         final AtomicInteger depth = new AtomicInteger(0);
@@ -53,11 +54,11 @@ public class Day2 implements Day {
 
         System.out.println("Horizontal: " + horizontal.get());
         System.out.println("Depth: " + depth.get());
-        System.out.println("Result = Horizontal * Depth:" + (horizontal.get() * depth.get()));
+        return horizontal.get() * depth.get();
     }
 
-    @Override
-    public void runPart2() {
+    @Part(part = 2)
+    public int secondPart() {
         // Keep track of our position
         final AtomicInteger horizontal = new AtomicInteger(0);
         final AtomicInteger depth = new AtomicInteger(0);
@@ -90,6 +91,6 @@ public class Day2 implements Day {
 
         System.out.println("Horizontal: " + horizontal.get());
         System.out.println("Depth: " + depth.get());
-        System.out.println("Result = Horizontal * Depth:" + (horizontal.get() * depth.get()));
+        return horizontal.get() * depth.get();
     }
 }
