@@ -28,7 +28,7 @@ public class Day4 implements Day {
         // Get the daw order
         List<Integer> drawOrder = Arrays.stream(lines.get(0).split(",")).map(Integer::parseInt).collect(Collectors.toList());
 
-        // Get how many cards there are, each card has 5 text lines and an empty space between them.
+        // Get how many cards there are, each card has 5 text lines and an empty space between them. Skip 2 lines because these are for the draw order
         int cardAmount = (this.lines.size() - 2) / 6;
 
         List<BingoCard> cards = new ArrayList<>();
@@ -159,7 +159,7 @@ public class Day4 implements Day {
                 }
             }
 
-            // Horizontal
+            // Vertical
             for (int col = 0; col < numbers.length; col++) {
                 boolean rowIsABingo = true;
                 for (int row = 0; row < numbers[col].length; row++) {
