@@ -145,7 +145,7 @@ public class Day8 implements Day {
             }
         }
 
-        return results.stream().reduce(0, Integer::sum); // 998900
+        return results.stream().reduce(0, Integer::sum);
     }
 
 

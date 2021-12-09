@@ -78,7 +78,7 @@ public class Day6 implements Day {
 
         }
 
-        return resetStates.values().stream().reduce(0L, Long::sum); // 360761
+        return resetStates.values().stream().reduce(0L, Long::sum);
     }
 
 
@@ -87,7 +87,7 @@ public class Day6 implements Day {
 
 
     /**
-     * Dont use this method because it can cause a out of memory error when using a high day amount;
+     * Dont use this method because it can cause an out of memory error when using a high day amount;
      */
     @Deprecated
     private long getFishAmountBad(int days) {
