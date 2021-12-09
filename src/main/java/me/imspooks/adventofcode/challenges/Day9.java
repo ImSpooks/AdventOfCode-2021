@@ -4,17 +4,9 @@ import lombok.RequiredArgsConstructor;
 import me.imspooks.adventofcode.challenges.interfaces.Day;
 import me.imspooks.adventofcode.challenges.interfaces.Part;
 import me.imspooks.adventofcode.util.InputReader;
-import me.imspooks.adventofcode.util.Pair;
 
-import java.awt.*;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -46,7 +38,104 @@ public class Day9 implements Day {
 
     @Part(part = 1)
     public int firstPart() {
-        int result = 0;
+        return this.getLowestPoints().stream().map(p -> p.value + 1).reduce(0, Integer::sum);
+    }
+
+    @Part(part = 2)
+    public int secondPart() {
+        // Convert all points to a set
+        List<Set<BasinPoint>> basins = this.getLowestPoints().stream().map(p -> {
+            Set<BasinPoint> points = new HashSet<>();
+            points.add(p);
+            return points;
+        }).collect(Collectors.toList());
+
+        int MAX_VALUE = 9;
+
+        boolean allHandled = false;
+
+        // Check if every point has been handled
+        while (!allHandled) {
+            for (Set<BasinPoint> basinPoint : basins) {
+                Set<BasinPoint> pointsToAdd = new HashSet<>();
+
+                for (BasinPoint point : basinPoint) {
+                    int x = point.x;
+                    int y = point.y;
+
+                    // Loop through each direction
+                    for (Direction direction : Direction.getDirections()) {
+                        try {
+                            int newX = x + direction.x;
+                            int newY = y + direction.y;
+                            int value = map[newX][newY];
+
+                            BasinPoint newPoint = new BasinPoint(value, newX, newY);
+
+                            // Check if the point isn't the same as the max value and add it
+                            if (map[newPoint.x][newPoint.y] != MAX_VALUE) {
+                                pointsToAdd.add(newPoint);
+                            }
+                        } catch (IndexOutOfBoundsException ignored) {
+                            // We do not care if this happens
+                        }
+
+                        point.handled = true;
+                    }
+                }
+
+                // Add the new points to our set
+                basinPoint.addAll(pointsToAdd);
+            }
+
+            // Set if every point has been handled or not
+            allHandled = basins.stream().flatMap(Set::stream).allMatch(p -> p.handled);
+        }
+
+        basins.sort((a, b) -> b.size() - a.size());
+        int result = 1;
+        for (int i = 0; i < 3; i++) {
+            result = result * basins.get(i).size();
+        }
+
+        // Create a visual map of all the basins for debugging purposes
+//        StringBuilder builder = new StringBuilder("");
+//        float colors = 50.0f;
+//        float brightness = 12.0f;
+//        for (int x = 0; x < map.length; x++) {
+//            builder.append("<span>").append(x).append(": </span>");
+//
+//            for (int y = 0; y < map[x].length; y++) {
+//                final int current = map[x][y];
+//
+//                String css = "";
+//
+//                for (int i = 0; i < basins.size(); i++) {
+//                    if (basins.get(i).contains(new BasinPoint(x, y))) {
+//                        Color color = new Color(Color.HSBtoRGB((float) i % colors / colors, 1.0f, 0.5f + (i % brightness / brightness) * 0.5f));
+//
+//                        css = "color:" + String.format("#%02x%02x%02x", color.getRed(), color.getGreen(), color.getBlue()) +
+//                                ";text-shadow:0px 1px 3px;";
+//                    }
+//                }
+//
+//                builder.append("<span style=\"").append(css).append("\">").append(current).append("</span>");
+//
+//            }
+//            builder.append("<br>");
+//        }
+//
+//        try {
+//            Files.write(Paths.get("./day-9-result.html"), builder.toString().getBytes(StandardCharsets.UTF_8));
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+
+        return result;
+    }
+
+    public List<BasinPoint> getLowestPoints() {
+        List<BasinPoint> points = new ArrayList<>();
 
         // Loop through each position
         for (int x = 0; x < this.map.length; x++) {
@@ -54,220 +143,26 @@ public class Day9 implements Day {
                 final int current = this.map[x][y];
 
                 // Get the directions we can check, we can only check our upper wall if we aren't at the top for example
-                Set<Direction> directions = new HashSet<>();
-
-                // Upper wall
-                if (x != 0) {
-                    directions.add(Direction.NORTH);
-                }
-                // Bottom wall
-                if (x != this.map.length - 1) {
-                    directions.add(Direction.SOUTH);
-                }
-
-                // Left wall
-                if (y != 0) {
-                    directions.add(Direction.WEST);
-                }
-
-                // Right wall
-                if (y != this.map[x].length - 1) {
-                    directions.add(Direction.EAST);
-                }
+                Set<Direction> directions = Direction.getDirections();
 
                 // Remove direction if the value is higher than our current value
                 int finalX = x, finalY = y;
                 directions.removeIf(direction -> {
                     try {
                         return this.map[finalX + direction.x][finalY + direction.y] > current;
-                    } catch (Exception e) {
-                        System.out.println("finalX = " + finalX);
-                        System.out.println("finalY = " + finalY);
-                        System.out.println("direction = " + direction);
-                        return false;
+                    } catch (IndexOutOfBoundsException e) {
+                        return true;
                     }
                 });
 
                 // If the directions are empty, add to our result
                 if (directions.isEmpty()) {
-                    result += current + 1;
+                    points.add(new BasinPoint(current, x, y));
                 }
             }
         }
 
-        return result;
-    }
-
-    @Part(part = 2)
-    public int secondPart() {
-        // Keep track of how large our basin is;
-        List<Pair<Integer, Integer>> basinLowest = new ArrayList<>();
-
-        // Loop through each position
-        for (int x = 0; x < map.length; x++) {
-            for (int y = 0; y < map[x].length; y++) {
-                final int current = map[x][y];
-
-                Set<Direction> directions = this.getDirections(x, y);
-
-                // Remove direction if the value is higher than our current value
-                int finalX = x, finalY = y;
-                directions.removeIf(direction -> {
-                    try {
-                        return this.map[finalX + direction.x][finalY + direction.y] > current;
-                    } catch (Exception e) {
-                        System.out.println("finalX = " + finalX);
-                        System.out.println("finalY = " + finalY);
-                        System.out.println("direction = " + direction);
-                        return false;
-                    }
-                });
-
-                // If the directions are empty
-                if (directions.isEmpty()) {
-                    basinLowest.add(new Pair<>(x, y));
-                }
-            }
-        }
-
-        List<Set<Pair<Integer, Integer>>> allPositions = new ArrayList<>();
-
-        List<Pair<Pair<Integer, Integer>, Integer>> basins = new ArrayList<>();
-
-        for (Pair<Integer, Integer> pair : basinLowest) {
-            Set<Pair<Integer, Integer>> positions = new HashSet<>();
-
-            System.out.println(pair.getKey() + "," + pair.getValue() + "=" + map[pair.getKey()][pair.getValue()]);
-
-            // Add the basin amount to our result, don't forget to add another 1 to it because it is our first point
-            this.getBasinSize(pair, positions);
-
-            basins.add(new Pair<>(pair, positions.size()));
-
-            allPositions.add(positions);
-        }
-
-        // Sort from highest to lowest
-        allPositions.sort((a, b) -> b.size() - a.size());
-        basins.sort((a, b) -> b.getValue() - a.getValue());
-
-        int result = 1;
-        for (int i = 0; i < 3; i++) {
-            result = result * basins.get(i).getValue();
-        }
-
-
-        // Create a visual map of all the basins for debugging purposses
-        StringBuilder builder = new StringBuilder("");
-        float colors = 50.0f;
-        for (int x = 0; x < map.length; x++) {
-            builder.append("<span>").append(x).append(": </span>");
-
-            for (int y = 0; y < map[x].length; y++) {
-                final int current = map[x][y];
-
-                String css = "";
-
-                for (int i = 0; i < allPositions.size(); i++) {
-                    if (allPositions.get(i).contains(new Pair<>(x, y))) {
-                        Color color = new Color(Color.HSBtoRGB((float) i % colors / colors, 1.0f, 1.0f));
-
-                        css = "color:" + String.format("#%02x%02x%02x", color.getRed(), color.getGreen(), color.getBlue()) +
-                            ";text-shadow:0px 1px 3px;";
-                    }
-                }
-
-
-                builder.append("<span style=\"").append(css).append("\">").append(current).append("</span>");
-
-            }
-            builder.append("<br>");
-        }
-
-        try {
-            Files.write(Paths.get("./day-9-result.html"), builder.toString().getBytes(StandardCharsets.UTF_8));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-
-        return result;
-    }
-
-    /**
-     * Add all basins into a hash set
-     *
-     * @param position The {@link Pair<Integer, Integer>} x and y position
-     */
-    private  Set<Pair<Integer, Integer>> getBasinSize(Pair<Integer, Integer> position, Set<Pair<Integer, Integer>> current) {
-        final int x = position.getKey();
-        final int y = position.getValue();
-
-        current.add(position);
-
-        Set<Pair<Integer, Integer>> upperDirections = this.getUpperDirections(x, y);
-
-        for (Pair<Integer, Integer> newPos : upperDirections) {
-            this.getBasinSize(newPos, current);
-        }
-
-        return current;
-    }
-
-    /**
-     * Get if the current position has an adjacent that is 1 higher
-     *
-     * @param x Our current x position
-     * @param y Our current y position
-     * @return A {@link Set<Direction>} of the adjacent directions
-     */
-    private Set<Pair<Integer, Integer>> getUpperDirections(int x, int y) {
-        Set<Direction> directions = this.getDirections(x, y);
-
-        directions.removeIf(direction -> {
-            try {
-                return map[x + direction.x][y + direction.y] - map[x][y] != 1;
-            } catch (Exception e) {
-                System.out.println("finalX = " + x);
-                System.out.println("finalY = " + y);
-                System.out.println("direction = " + direction);
-                return false;
-            }
-        });
-
-        return directions.stream().map(dir -> new Pair<>(x + dir.x, y + dir.y)).collect(Collectors.toSet());
-    }
-
-    /**
-     * Get the directions we can check in our map
-     *
-     * @param x Our current x position
-     * @param y Our current y position
-     * @return A {@link Set<Direction>} of the adjacent directions
-     */
-    private Set<Direction> getDirections(int x, int y) {
-        // Get the directions we can check, we can only check our upper wall if we aren't at the top for example
-        Set<Direction> directions = new HashSet<>();
-
-        // Upper wall
-        if (x != 0) {
-            directions.add(Direction.NORTH);
-        }
-        // Bottom wall
-        if (x != map.length - 1) {
-            directions.add(Direction.SOUTH);
-        }
-
-        // Left wall
-        if (y != 0) {
-            directions.add(Direction.WEST);
-        }
-
-        // Right wall
-        if (y != map[x].length - 1) {
-            directions.add(Direction.EAST);
-        }
-        return directions;
+        return points;
     }
 
     @RequiredArgsConstructor
@@ -281,5 +176,30 @@ public class Day9 implements Day {
         // Relative values from our current position
         private final int x;
         private final int y;
+
+        public static Set<Direction> getDirections() {
+            return Arrays.stream(Direction.values()).collect(Collectors.toSet());
+        }
+    }
+
+    @RequiredArgsConstructor
+    private static class BasinPoint {
+        private final int value;
+        private final int x;
+        private final int y;
+        private boolean handled = false;
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            BasinPoint that = (BasinPoint) o;
+            return value == that.value && x == that.x && y == that.y;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(value, x, y);
+        }
     }
 }
