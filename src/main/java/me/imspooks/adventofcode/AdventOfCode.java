@@ -3,7 +3,6 @@ package me.imspooks.adventofcode;
 import me.imspooks.adventofcode.challenges.interfaces.Day;
 import me.imspooks.adventofcode.challenges.interfaces.Part;
 
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
@@ -19,12 +18,12 @@ import java.util.Scanner;
 public class AdventOfCode {
 
     public AdventOfCode(String[] args) {
-        int day;
-        int part;
+        int day = -1;
+        int part = -1;
 
         if (args.length > 0) {
             day = Integer.parseInt(args[0]);
-            part = args.length > 1 ? Integer.parseInt(args[1]) : 0;
+            part = args.length > 1 ? Integer.parseInt(args[1]) : -1;
         } else {
             Path path = Paths.get("./run.txt");
             if (Files.exists(path)) {
@@ -32,10 +31,9 @@ public class AdventOfCode {
                     String[] content = new String(Files.readAllBytes(path), StandardCharsets.UTF_8).split(" ");
                     day = Integer.parseInt(content[0]);
                     part = Integer.parseInt(content[1]);
-                } catch (IOException e) {
+                } catch (ArrayIndexOutOfBoundsException ignored) {
+                } catch (Exception e) {
                     e.printStackTrace();
-                    day = -1;
-                    part = -1;
                 }
             } else {
                 Scanner scanner = new Scanner(System.in);
@@ -65,17 +63,15 @@ public class AdventOfCode {
         Day day = (Day) clazz.getConstructor().newInstance();
         day.preRun();
 
-        Object result = null;
-
         for (Method method : clazz.getMethods()) {
             Part part = method.getAnnotation(Part.class);
-            if (part != null && part.part() == partNr) {
-                result = method.invoke(day);
+            if (part != null && (partNr == -1 || part.part() == partNr)) {
+                Object result = method.invoke(day);
+
+                System.out.print("**Result for day " + dayNr + " part " + part.part() + ":** ");
+                System.out.println(result);
             }
         }
-
-        System.out.println("Result for day " + dayNr + " part " + partNr + ":");
-        System.out.println(result);
     }
 
     public static void main(String[] args) {
