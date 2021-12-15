@@ -13,7 +13,7 @@ import java.util.Objects;
 @Getter
 @Setter
 @AllArgsConstructor
-public class Position<T> {
+public class Position<T extends Number> {
     private T x;
     private T y;
 
