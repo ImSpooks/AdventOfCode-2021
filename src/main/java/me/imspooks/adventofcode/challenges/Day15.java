@@ -102,7 +102,7 @@ public class Day15 implements Day {
 
     private ChargedPath getLowestCostPath(Position<Integer> position, Position<Integer> end, int[][] map) {
         // Create our queue and keep track of positions whe visited
-        Queue<ChargedPath> queue = new PriorityQueue<>();
+        Queue<ChargedPath> queue = new PriorityQueue<>(); // Queue with a comparator, that compares the polls the current lowest cost path
         Set<Position<Integer>> visited = new HashSet<>();
 
         // Add the starting position
