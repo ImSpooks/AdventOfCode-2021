@@ -29,6 +29,9 @@ public class InputReader {
     public Stream<String> getLines(Charset charset) {
         return new BufferedReader(new InputStreamReader(this.inputStream, charset)).lines();
     }
+    public String getString(Charset charset) {
+        return new BufferedReader(new InputStreamReader(this.inputStream, charset)).lines().collect(StringBuilder::new, StringBuilder::append, StringBuilder::append).toString();
+    }
 
     public static InputReader toReader(String resource) {
         return new InputReader(resource);
